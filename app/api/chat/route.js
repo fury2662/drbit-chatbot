@@ -1,33 +1,33 @@
-export async function POST(request) {
+﻿export async function POST(request) {
   const { messages } = await request.json();
 
   const apiKey = process.env.GROQ_API_KEY;
   console.log("API KEY exists:", !!apiKey);
 
   if (!apiKey) {
-    return Response.json({ reply: "API 키가 설정되지 않았습니다." }, { status: 500 });
+    return Response.json({ reply: "API ?ㅺ? ?ㅼ젙?섏? ?딆븯?듬땲??" }, { status: 500 });
   }
 
-  const SYSTEM_PROMPT = `당신은 비트컴퓨터 닥터비트사업부의 친절한 고객지원 AI 챗봇입니다.
-의원급 EMR 소프트웨어(U차트, A차트, 비트플러스)를 사용하는 병·의원 고객의 기술 문의에 답변합니다.
-고객센터: 02-3486-5432 / 운영: 평일 09:00-18:00
+  const SYSTEM_PROMPT = `?뱀떊? 鍮꾪듃而댄벂???ν꽣鍮꾪듃?ъ뾽遺??移쒖젅??怨좉컼吏??AI 梨쀫큸?낅땲??
+?섏썝湲?EMR ?뚰봽?몄썾??U李⑦듃, A李⑦듃, 鍮꾪듃?뚮윭??瑜??ъ슜?섎뒗 蹂뫢룹쓽??怨좉컼??湲곗닠 臾몄쓽???듬??⑸땲??
+怨좉컼?쇳꽣: 02-3486-5432 / ?댁쁺: ?됱씪 09:00-18:00
 
-[중요] 반드시 순수한 한국어로만 답변하세요. 영어, 중국어, 일본어, 태국어 등 다른 언어를 절대 섞지 마세요.
-모든 답변은 처음부터 끝까지 한국어로만 작성해야 합니다.
-친절하고 명확하게 한국어로 답변하고, 모르는 내용은 고객센터 안내, 답변이 길면 번호 목록으로 정리.
+[以묒슂] 諛섎뱶???쒖닔???쒓뎅?대줈留??듬??섏꽭?? ?곸뼱, 以묎뎅?? ?쇰낯?? ?쒓뎅?????ㅻⅨ ?몄뼱瑜??덈? ?욎? 留덉꽭??
+紐⑤뱺 ?듬?? 泥섏쓬遺???앷퉴吏 ?쒓뎅?대줈留??묒꽦?댁빞 ?⑸땲??
+移쒖젅?섍퀬 紐낇솗?섍쾶 ?쒓뎅?대줈 ?듬??섍퀬, 紐⑤Ⅴ???댁슜? 怨좉컼?쇳꽣 ?덈궡, ?듬???湲몃㈃ 踰덊샇 紐⑸줉?쇰줈 ?뺣━.
 
-주요 FAQ:
-1. DB 용량 오류: SQL DB 10GB 초과시 발생. 뉴튜닝(오래된 데이터 삭제+축소) 또는 구튜닝(긴급 임시축소) 실행.
-2. 청구 변환/송신 오류: 오류검사 실행 → 심사화면 수정 → 재집계. HIRA 재설치 또는 EDI ini파일 경로 확인.
-3. 연말정산: 연말정산메뉴 → 집계 → 파일생성 → 국세청 홈택스 전송.
-4. 진료확인번호 누락: 자격조회 재실행. 수동발급은 공단(1577-1000) 문의.
-5. 자보 청구 오류: 취득일자/종료일자/지급보증번호 확인 후 인적변경 재집계.
-6. 수탁거래처 코드: 기본자료에서 코드/기간 확인. 종료일자 9999-99-99로 연장.
-7. 통계 느림: UPDATE STATISTICS 쿼리 실행 또는 PC 재부팅.
-8. 접수: 카드기본수납(기타>세부옵션>기타설정2), 임산부(특이사항41번+F015), 산정특례(V코드).
-9. 환경설정: 처방전주민번호(개인정보보호 체크해제), PACS설정, 한글깨짐(UTF-8 체크해제).
-10. 기타: 비트캐스트 안열림(관리자권한+방화벽종료), EDI오류(hira_ddmd.ini 경로확인).
-11. SQL: 포트 기본1433/EMR2002/캐스트9000. 계정잠김시 ALTER LOGIN sa WITH PASSWORD='bit' UNLOCK.`;
+二쇱슂 FAQ:
+1. DB ?⑸웾 ?ㅻ쪟: SQL DB 10GB 珥덇낵??諛쒖깮. ?댄뒠???ㅻ옒???곗씠????젣+異뺤냼) ?먮뒗 援ы뒠??湲닿툒 ?꾩떆異뺤냼) ?ㅽ뻾.
+2. 泥?뎄 蹂???≪떊 ?ㅻ쪟: ?ㅻ쪟寃???ㅽ뻾 ???ъ궗?붾㈃ ?섏젙 ???ъ쭛怨? HIRA ?ъ꽕移??먮뒗 EDI ini?뚯씪 寃쎈줈 ?뺤씤.
+3. ?곕쭚?뺤궛: ?곕쭚?뺤궛硫붾돱 ??吏묎퀎 ???뚯씪?앹꽦 ??援?꽭泥??덊깮???꾩넚.
+4. 吏꾨즺?뺤씤踰덊샇 ?꾨씫: ?먭꺽議고쉶 ?ъ떎?? ?섎룞諛쒓툒? 怨듬떒(1577-1000) 臾몄쓽.
+5. ?먮낫 泥?뎄 ?ㅻ쪟: 痍⑤뱷?쇱옄/醫낅즺?쇱옄/吏湲됰낫利앸쾲???뺤씤 ???몄쟻蹂寃??ъ쭛怨?
+6. ?섑긽嫄곕옒泥?肄붾뱶: 湲곕낯?먮즺?먯꽌 肄붾뱶/湲곌컙 ?뺤씤. 醫낅즺?쇱옄 9999-99-99濡??곗옣.
+7. ?듦퀎 ?먮┝: UPDATE STATISTICS 荑쇰━ ?ㅽ뻾 ?먮뒗 PC ?щ???
+8. ?묒닔: 移대뱶湲곕낯?섎궔(湲고?>?몃??듭뀡>湲고??ㅼ젙2), ?꾩궛遺(?뱀씠?ы빆41踰?F015), ?곗젙?밸?(V肄붾뱶).
+9. ?섍꼍?ㅼ젙: 泥섎갑?꾩＜誘쇰쾲??媛쒖씤?뺣낫蹂댄샇 泥댄겕?댁젣), PACS?ㅼ젙, ?쒓?源⑥쭚(UTF-8 泥댄겕?댁젣).
+10. 湲고?: 鍮꾪듃罹먯뒪???덉뿴由?愿由ъ옄沅뚰븳+諛⑺솕踰쎌쥌猷?, EDI?ㅻ쪟(hira_ddmd.ini 寃쎈줈?뺤씤).
+11. SQL: ?ы듃 湲곕낯1433/EMR2002/罹먯뒪??000. 怨꾩젙?좉???ALTER LOGIN sa WITH PASSWORD='bit' UNLOCK.`;
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -36,7 +36,7 @@ export async function POST(request) {
       "Authorization": `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-8b-instant",
       max_tokens: 1000,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -52,7 +52,7 @@ export async function POST(request) {
   if (!response.ok || !data.choices || !data.choices[0]) {
     const errMsg = data.error?.message || JSON.stringify(data);
     console.error("Error:", errMsg);
-    return Response.json({ reply: "오류: " + errMsg }, { status: 500 });
+    return Response.json({ reply: "?ㅻ쪟: " + errMsg }, { status: 500 });
   }
 
   const reply = data.choices[0].message.content;
