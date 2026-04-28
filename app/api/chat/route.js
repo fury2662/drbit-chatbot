@@ -37,7 +37,7 @@
     },
     body: JSON.stringify({
       model: "llama-3.1-8b-instant",
-      max_tokens: 1000,
+      max_tokens: 500,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         ...messages
