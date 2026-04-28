@@ -101,7 +101,7 @@ export async function POST(request) {
       "x-api-key": process.env.ANTHROPIC_API_KEY,
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages,
@@ -109,15 +109,13 @@ export async function POST(request) {
   });
 
   const data = await response.json();
+  console.log("API 응답 status:", response.status);
+  console.log("API 응답 data:", JSON.stringify(data));
 
-  if (!response.ok) {
-    console.error("Anthropic API 오류:", JSON.stringify(data));
-    return Response.json({ reply: `API 오류: ${data.error?.message || response.status}` }, { status: 500 });
-  }
-
-  if (!data.content || !data.content[0] || !data.content[0].text) {
-    console.error("응답 구조 오류:", JSON.stringify(data));
-    return Response.json({ reply: "응답 형식 오류가 발생했습니다." }, { status: 500 });
+  if (!response.ok || !data.content || !data.content[0]) {
+    const errMsg = data.error?.message || JSON.stringify(data);
+    console.error("오류:", errMsg);
+    return Response.json({ reply: "오류: " + errMsg }, { status: 500 });
   }
 
   return Response.json({ reply: data.content[0].text });
