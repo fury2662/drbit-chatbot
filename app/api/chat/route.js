@@ -109,5 +109,16 @@ export async function POST(request) {
   });
 
   const data = await response.json();
+
+  if (!response.ok) {
+    console.error("Anthropic API 오류:", JSON.stringify(data));
+    return Response.json({ reply: `API 오류: ${data.error?.message || response.status}` }, { status: 500 });
+  }
+
+  if (!data.content || !data.content[0] || !data.content[0].text) {
+    console.error("응답 구조 오류:", JSON.stringify(data));
+    return Response.json({ reply: "응답 형식 오류가 발생했습니다." }, { status: 500 });
+  }
+
   return Response.json({ reply: data.content[0].text });
 }
