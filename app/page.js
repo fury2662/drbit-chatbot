@@ -121,14 +121,14 @@ export default function Home() {
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
             placeholder="문의 내용을 입력하세요... (Shift+Enter: 줄바꿈)"
             rows={1}
-            style={{ flex: 1, border: "1.5px solid #e5e7eb", borderRadius: 12, padding: "9px 13px", fontSize: 13.5, resize: "none", outline: "none", fontFamily: "inherit", maxHeight: 90, lineHeight: 1.5, boxSizing: "border-box" }}
+            style={{ flex: 1, border: "1.5px solid #e5e7eb", borderRadius: 12, padding: "9px 13px", fontSize: 13.5, resize: "none", outline: "none", fontFamily: "inherit", maxHeight: 90, lineHeight: 1.5, boxSizing: "border-box", color: "#1f2937", background: "#ffffff" }}
           />
           <button onClick={() => sendMessage()} disabled={isLoading || !input.trim()} style={{ width: 40, height: 40, background: isLoading || !input.trim() ? "#93c5fd" : "#1a56db", border: "none", borderRadius: 10, color: "#fff", fontSize: 17, cursor: isLoading || !input.trim() ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             ➤
           </button>
         </div>
       </div>
-      <style>{`@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }`}</style>
+      <style>{`@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} } textarea::placeholder { color: #9ca3af; }`}</style>
     </div>
   );
 }
