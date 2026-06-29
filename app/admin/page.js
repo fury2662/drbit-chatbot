@@ -55,7 +55,7 @@ export default function AdminPage() {
   const filtered = faqs.filter(f => f.q?.includes(search) || f.a?.includes(search));
 
   return (
-    <div style={{ fontFamily: "Malgun Gothic, sans-serif", maxWidth: 900, margin: "0 auto", padding: 24 }}>
+    <div style={{ fontFamily: "Malgun Gothic, sans-serif", maxWidth: 900, width: "100%", margin: "0 auto", padding: 24, boxSizing: "border-box" }}>
       <h2 style={{ color: "#1a56a0", borderBottom: "2px solid #1a56a0", paddingBottom: 8 }}>
         🛠️ FAQ 관리자 페이지
       </h2>
@@ -72,7 +72,7 @@ export default function AdminPage() {
       </div>
 
       {/* 검색 */}
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 질문/답변 검색" style={{ ...inputStyle, marginBottom: 16 }} />
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 질문/답변 검색" style={{ ...inputStyle, marginBottom: 16, width: "100%", minWidth: 300 }} />
       <div style={{ color: "#666", marginBottom: 8, fontSize: 14 }}>총 {filtered.length}개</div>
 
       {/* FAQ 목록 */}
