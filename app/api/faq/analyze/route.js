@@ -33,6 +33,7 @@ export async function POST(request) {
     const fileName = file.name.toLowerCase();
     const buffer = Buffer.from(await file.arrayBuffer());
     let text = "";
+    let imagePart = null;
 
     if (fileName.endsWith(".txt")) {
       text = buffer.toString("utf-8");
@@ -44,32 +45,46 @@ export async function POST(request) {
         const content = await page.getTextContent();
         text += content.items.map(s => s.str).join(" ") + "\n";
       }
+    } else if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".webp")) {
+      const mimeType = fileName.endsWith(".png") ? "image/png" : fileName.endsWith(".webp") ? "image/webp" : "image/jpeg";
+      imagePart = { inline_data: { mime_type: mimeType, data: buffer.toString("base64") } };
     } else {
       // pptx, docx는 텍스트 추출이 복잡하므로 base64로 Gemini에 전달
       text = `[파일명: ${file.name}] 이 파일의 내용을 분석해주세요.`;
     }
 
-    // Gemini로 Q&A 추출
     const apiKey = process.env.GEMINI_API_KEY;
-    const prompt = `다음 문서 내용을 분석해서 FAQ Q&A를 최대 20개 추출해주세요.
+    let parts;
+
+    if (imagePart) {
+      const promptText = `이 이미지(스크린샷/문서)의 내용을 분석해서 FAQ Q&A를 최대 20개 만들어주세요.
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.
+[{"q":"질문1","a":"답변1"}]`;
+      parts = [{ text: promptText }, imagePart];
+    } else {
+      const prompt = `다음 문서 내용을 분석해서 FAQ Q&A를 최대 20개 추출해주세요.
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.
 [{"q":"질문1","a":"답변1"},{"q":"질문2","a":"답변2"}]
 
 문서 내용:
 ${text.slice(0, 8000)}`;
+      parts = [{ text: prompt }];
+    }
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        body: JSON.stringify({ contents: [{ parts }] })
       }
     );
     const geminiData = await res.json();
     const raw = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
     const clean = raw.replace(/```json|```/g, "").trim();
     const qaList = JSON.parse(clean);
+
+    if (!qaList.length) return Response.json({ error: "추출된 Q&A가 없습니다" }, { status: 400 });
 
     const { content, sha } = await getFileSHA();
     const newItems = qaList.map(r => ({ id: Date.now() + Math.random(), q: r.q, a: r.a }));

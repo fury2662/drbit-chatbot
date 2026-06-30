@@ -86,8 +86,9 @@ export default function AdminPage() {
     const data = await res.json();
     await fetchFAQ();
     setLoading(false);
-    if (data.count) notify(`✅ AI가 ${data.count}개 Q&A를 추출했어요!`);
-    else notify("❌ 오류: " + (data.error || "알 수 없음"), "err");
+    if (data.count > 0) notify(`✅ AI가 ${data.count}개 Q&A를 추출했어요!`);
+    else if (data.error) notify("❌ 오류: " + data.error, "err");
+    else notify("⚠️ 추출된 Q&A가 없어요.", "err");
     docRef.current.value = "";
   }
 
@@ -99,8 +100,9 @@ export default function AdminPage() {
     const data = await res.json();
     await fetchFAQ();
     setLoading(false);
-    if (data.count) notify(`✅ AI가 ${data.count}개 Q&A를 추출했어요!`);
-    else notify("❌ 오류: " + (data.error || "알 수 없음"), "err");
+    if (data.count > 0) notify(`✅ AI가 ${data.count}개 Q&A를 추출했어요!`);
+    else if (data.error) notify("❌ 오류: " + data.error, "err");
+    else notify("⚠️ 추출된 Q&A가 없어요. 다른 페이지를 시도해보세요.", "err");
     setUrl("");
   }
 
@@ -183,16 +185,16 @@ export default function AdminPage() {
         {/* 탭3: 문서 업로드 */}
         {tab === 2 && <div style={{ background: "#fff", borderRadius: 8, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
           <h3 style={{ color: "#1a56a0", marginTop: 0 }}>📄 문서 업로드</h3>
-          <p style={{ color: "#555", fontSize: 14 }}>PDF, PPT, Word 문서를 올리면 AI가 내용을 분석해서 Q&A를 자동으로 만들어요.</p>
+          <p style={{ color: "#555", fontSize: 14 }}>PDF, PPT, Word, 스크린샷(이미지)을 올리면 AI가 내용을 분석해서 Q&A를 자동으로 만들어요.</p>
           <div style={{ background: "#fff8e1", borderRadius: 6, padding: 16, marginBottom: 20, fontSize: 13, color: "#444" }}>
             <b>⚠️ 참고사항:</b><br />
-            - AI가 문서 내용을 분석해서 Q&A를 자동 추출해요<br />
-            - 분석 결과는 문서 내용에 따라 다를 수 있어요<br />
+            - AI가 문서/이미지 내용을 분석해서 Q&A를 자동 추출해요<br />
+            - 로그인이 필요한 화면은 캡처(스크린샷)해서 올려주세요<br />
             - 추가된 후 FAQ 관리 탭에서 수정 가능해요
           </div>
-          <input ref={docRef} type="file" accept=".pdf,.pptx,.ppt,.docx,.doc,.txt" onChange={uploadDoc} disabled={loading}
+          <input ref={docRef} type="file" accept=".pdf,.pptx,.ppt,.docx,.doc,.txt,.png,.jpg,.jpeg,.webp" onChange={uploadDoc} disabled={loading}
             style={{ display: "block", marginBottom: 12 }} />
-          <p style={{ color: "#888", fontSize: 12 }}>지원 형식: .pdf, .pptx, .docx, .txt</p>
+          <p style={{ color: "#888", fontSize: 12 }}>지원 형식: .pdf, .pptx, .docx, .txt, .png, .jpg</p>
         </div>}
 
         {/* 탭4: URL 학습 */}
