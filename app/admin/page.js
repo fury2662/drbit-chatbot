@@ -223,5 +223,5 @@ export default function AdminPage() {
   );
 }
 
-const inp = { display: "block", width: "100%", padding: "9px 12px", marginBottom: 8, borderRadius: 6, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", fontFamily: "Malgun Gothic, sans-serif" };
+const inp = { display: "block", width: "100%", padding: "9px 12px", marginBottom: 8, borderRadius: 6, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", fontFamily: "Malgun Gothic, sans-serif", color: "#222" };
 const btn = (bg) => ({ background: bg, color: "#fff", border: "none", borderRadius: 6, padding: "9px 20px", cursor: "pointer", fontSize: 14, fontFamily: "Malgun Gothic, sans-serif" });
