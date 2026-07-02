@@ -270,31 +270,24 @@ export default function AdminPage() {
             <div key={fb.id} style={{ background: "#fff", borderRadius: 8, padding: 16, marginBottom: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: fb.corrected ? "4px solid #2e7d32" : "4px solid #c62828" }}>
               <div style={{ fontSize: 11, color: "#aaa", marginBottom: 8 }}>📅 {fb.time}</div>
               <div style={{ fontWeight: "bold", color: "#1a56a0", marginBottom: 6 }}>Q. {fb.question}</div>
-              <div style={{ color: "#666", fontSize: 13, whiteSpace: "pre-wrap", background: "#f9f9f9", padding: "8px 12px", borderRadius: 6, marginBottom: 10 }}>
-                <b>AI 답변:</b><br />{fb.answer}
-              </div>
-              {fb.corrected ? (
-                <div style={{ color: "#2e7d32", fontSize: 13, background: "#e8f5e9", padding: "8px 12px", borderRadius: 6 }}>
-                  ✅ 수정 완료: {fb.corrected}
-                  <button onClick={() => setCorrecting(prev => ({ ...prev, [fb.id]: fb.corrected }))} style={{ ...btn("#888"), marginLeft: 8, fontSize: 11, padding: "2px 8px" }}>재편집</button>
-                </div>
+              {correcting[fb.id] !== undefined ? (
+                <>
+                  <textarea
+                    value={correcting[fb.id]}
+                    onChange={e => setCorrecting(prev => ({ ...prev, [fb.id]: e.target.value }))}
+                    rows={8}
+                    style={{ ...inp, resize: "vertical", marginBottom: 10, background: "#fffde7" }}
+                  />
+                  <button onClick={() => saveCorrection(fb)} disabled={loading || !correcting[fb.id]?.trim()} style={btn("#1a56a0")}>FAQ에 추가</button>
+                  <button onClick={() => setCorrecting(prev => { const n = {...prev}; delete n[fb.id]; return n; })} style={{ ...btn("#888"), marginLeft: 8 }}>취소</button>
+                </>
               ) : (
                 <>
-                  {!correcting[fb.id] && (
-                    <button onClick={() => setCorrecting(prev => ({ ...prev, [fb.id]: fb.answer }))} style={btn("#f57c00")}>✏️ 편집</button>
-                  )}
-                  {correcting[fb.id] !== undefined && (
-                    <>
-                      <textarea
-                        value={correcting[fb.id]}
-                        onChange={e => setCorrecting(prev => ({ ...prev, [fb.id]: e.target.value }))}
-                        rows={5}
-                        style={{ ...inp, resize: "vertical", marginTop: 8 }}
-                      />
-                      <button onClick={() => saveCorrection(fb)} disabled={loading || !correcting[fb.id]?.trim()} style={btn("#1a56a0")}>FAQ에 추가</button>
-                      <button onClick={() => setCorrecting(prev => { const n = {...prev}; delete n[fb.id]; return n; })} style={{ ...btn("#888"), marginLeft: 8 }}>취소</button>
-                    </>
-                  )}
+                  <div style={{ color: "#666", fontSize: 13, whiteSpace: "pre-wrap", background: fb.corrected ? "#e8f5e9" : "#f9f9f9", padding: "8px 12px", borderRadius: 6, marginBottom: 10 }}>
+                    <b>{fb.corrected ? "✅ 수정된 답변:" : "AI 답변:"}</b><br />
+                    {fb.corrected || fb.answer}
+                  </div>
+                  <button onClick={() => setCorrecting(prev => ({ ...prev, [fb.id]: fb.corrected || fb.answer }))} style={btn("#f57c00")}>✏️ 편집</button>
                 </>
               )}
               <button onClick={() => deleteFeedback(fb.id)} style={{ ...btn("#c62828"), marginLeft: 8 }}>삭제</button>
