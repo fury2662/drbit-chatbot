@@ -276,19 +276,25 @@ export default function AdminPage() {
               {fb.corrected ? (
                 <div style={{ color: "#2e7d32", fontSize: 13, background: "#e8f5e9", padding: "8px 12px", borderRadius: 6 }}>
                   ✅ 수정 완료: {fb.corrected}
+                  <button onClick={() => setCorrecting(prev => ({ ...prev, [fb.id]: fb.corrected }))} style={{ ...btn("#888"), marginLeft: 8, fontSize: 11, padding: "2px 8px" }}>재편집</button>
                 </div>
               ) : (
                 <>
-                  <textarea
-                    value={correcting[fb.id] || ""}
-                    onChange={e => setCorrecting(prev => ({ ...prev, [fb.id]: e.target.value }))}
-                    placeholder="올바른 답변을 입력하세요. FAQ에 자동으로 추가됩니다."
-                    rows={3}
-                    style={{ ...inp, resize: "vertical" }}
-                  />
-                  <button onClick={() => saveCorrection(fb)} disabled={loading || !correcting[fb.id]?.trim()} style={btn("#1a56a0")}>
-                    FAQ에 추가
-                  </button>
+                  {!correcting[fb.id] && (
+                    <button onClick={() => setCorrecting(prev => ({ ...prev, [fb.id]: fb.answer }))} style={btn("#f57c00")}>✏️ 편집</button>
+                  )}
+                  {correcting[fb.id] !== undefined && (
+                    <>
+                      <textarea
+                        value={correcting[fb.id]}
+                        onChange={e => setCorrecting(prev => ({ ...prev, [fb.id]: e.target.value }))}
+                        rows={5}
+                        style={{ ...inp, resize: "vertical", marginTop: 8 }}
+                      />
+                      <button onClick={() => saveCorrection(fb)} disabled={loading || !correcting[fb.id]?.trim()} style={btn("#1a56a0")}>FAQ에 추가</button>
+                      <button onClick={() => setCorrecting(prev => { const n = {...prev}; delete n[fb.id]; return n; })} style={{ ...btn("#888"), marginLeft: 8 }}>취소</button>
+                    </>
+                  )}
                 </>
               )}
               <button onClick={() => deleteFeedback(fb.id)} style={{ ...btn("#c62828"), marginLeft: 8 }}>삭제</button>
