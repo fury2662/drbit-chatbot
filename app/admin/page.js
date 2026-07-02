@@ -7,6 +7,7 @@ export default function AdminPage() {
   const [tab, setTab] = useState(0);
   const [faqs, setFaqs] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [fbFilter, setFbFilter] = useState("all"); // all, good, bad, pending
   const [correcting, setCorrecting] = useState({});
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState(null);
@@ -262,13 +263,31 @@ export default function AdminPage() {
           </button>
         </div>}
 
-        {/* 탭5: 불량 답변 */}
+        {/* 탭5: 피드백 관리 */}
         {tab === 4 && <div>
-          <div style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
-            총 {feedbacks.length}개 · 👍 {feedbacks.filter(f => f.isGood).length}개 · 👎 {feedbacks.filter(f => !f.isGood).length}개 · 미처리 {feedbacks.filter(f => !f.isGood && !f.corrected).length}개
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+            {[
+              { key: "all", label: `전체 ${feedbacks.length}개` },
+              { key: "good", label: `👍 ${feedbacks.filter(f => f.isGood).length}개` },
+              { key: "bad", label: `👎 ${feedbacks.filter(f => !f.isGood).length}개` },
+              { key: "pending", label: `⚠️ 미처리 ${feedbacks.filter(f => !f.isGood && !f.corrected).length}개` },
+            ].map(f => (
+              <button key={f.key} onClick={() => setFbFilter(f.key)} style={{
+                padding: "6px 14px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 13,
+                background: fbFilter === f.key ? "#1a56a0" : "#e0e0e0",
+                color: fbFilter === f.key ? "#fff" : "#555", fontFamily: "Malgun Gothic, sans-serif"
+              }}>{f.label}</button>
+            ))}
           </div>
           {feedbacks.length === 0 && <div style={{ background: "#fff", borderRadius: 8, padding: 24, textAlign: "center", color: "#aaa" }}>피드백이 없어요!</div>}
-          {[...feedbacks].reverse().map(fb => (
+          {[...feedbacks].reverse()
+            .filter(fb => {
+              if (fbFilter === "good") return fb.isGood;
+              if (fbFilter === "bad") return !fb.isGood;
+              if (fbFilter === "pending") return !fb.isGood && !fb.corrected;
+              return true;
+            })
+            .map(fb => (
             <div key={fb.id} style={{ background: "#fff", borderRadius: 8, padding: 16, marginBottom: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: fb.isGood ? "4px solid #2e7d32" : fb.corrected ? "4px solid #1a56a0" : "4px solid #c62828" }}>
               <div style={{ fontSize: 11, color: "#aaa", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
                 📅 {fb.time}
