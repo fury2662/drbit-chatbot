@@ -275,7 +275,7 @@ export default function AdminPage() {
                   <textarea
                     value={correcting[fb.id]}
                     onChange={e => setCorrecting(prev => ({ ...prev, [fb.id]: e.target.value }))}
-                    rows={8}
+                    rows={Math.max(8, correcting[fb.id]?.split('\n').length + 3)}
                     style={{ ...inp, resize: "vertical", marginBottom: 10, background: "#fffde7" }}
                   />
                   <button onClick={() => saveCorrection(fb)} disabled={loading || !correcting[fb.id]?.trim()} style={btn("#1a56a0")}>FAQ에 추가</button>
