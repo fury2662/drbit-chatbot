@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 
-const TABS = ["📋 FAQ 관리", "📊 엑셀/CSV", "📄 문서 업로드", "🌐 URL 학습", "👎 불량 답변"];
+const TABS = ["📋 FAQ 관리", "📊 엑셀/CSV", "📄 문서 업로드", "🌐 URL 학습", "💬 피드백 관리"];
 
 export default function AdminPage() {
   const [tab, setTab] = useState(0);
@@ -264,11 +264,18 @@ export default function AdminPage() {
 
         {/* 탭5: 불량 답변 */}
         {tab === 4 && <div>
-          <div style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>총 {feedbacks.length}개 · 미처리 {feedbacks.filter(f => !f.corrected).length}개</div>
-          {feedbacks.length === 0 && <div style={{ background: "#fff", borderRadius: 8, padding: 24, textAlign: "center", color: "#aaa" }}>👎 피드백이 없어요!</div>}
+          <div style={{ color: "#888", fontSize: 13, marginBottom: 12 }}>
+            총 {feedbacks.length}개 · 👍 {feedbacks.filter(f => f.isGood).length}개 · 👎 {feedbacks.filter(f => !f.isGood).length}개 · 미처리 {feedbacks.filter(f => !f.isGood && !f.corrected).length}개
+          </div>
+          {feedbacks.length === 0 && <div style={{ background: "#fff", borderRadius: 8, padding: 24, textAlign: "center", color: "#aaa" }}>피드백이 없어요!</div>}
           {[...feedbacks].reverse().map(fb => (
-            <div key={fb.id} style={{ background: "#fff", borderRadius: 8, padding: 16, marginBottom: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: fb.corrected ? "4px solid #2e7d32" : "4px solid #c62828" }}>
-              <div style={{ fontSize: 11, color: "#aaa", marginBottom: 8 }}>📅 {fb.time}</div>
+            <div key={fb.id} style={{ background: "#fff", borderRadius: 8, padding: 16, marginBottom: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: fb.isGood ? "4px solid #2e7d32" : fb.corrected ? "4px solid #1a56a0" : "4px solid #c62828" }}>
+              <div style={{ fontSize: 11, color: "#aaa", marginBottom: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                📅 {fb.time}
+                <span style={{ background: fb.isGood ? "#e8f5e9" : "#ffebee", color: fb.isGood ? "#2e7d32" : "#c62828", padding: "2px 8px", borderRadius: 10, fontWeight: "bold" }}>
+                  {fb.isGood ? "👍 좋은 답변" : "👎 나쁜 답변"}
+                </span>
+              </div>
               <div style={{ fontWeight: "bold", color: "#1a56a0", marginBottom: 6 }}>Q. {fb.question}</div>
               {correcting[fb.id] !== undefined ? (
                 <>
@@ -288,6 +295,7 @@ export default function AdminPage() {
                     {fb.corrected || fb.answer}
                   </div>
                   <button onClick={() => setCorrecting(prev => ({ ...prev, [fb.id]: fb.corrected || fb.answer }))} style={btn("#f57c00")}>✏️ 편집</button>
+                  {fb.isGood && <span style={{ marginLeft: 8, fontSize: 12, color: "#2e7d32" }}>👍 좋은 답변으로 저장됨</span>}
                 </>
               )}
               <button onClick={() => deleteFeedback(fb.id)} style={{ ...btn("#c62828"), marginLeft: 8 }}>삭제</button>

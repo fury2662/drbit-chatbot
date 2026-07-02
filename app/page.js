@@ -57,13 +57,11 @@ export default function Home() {
   async function sendFeedback(idx, isGood) {
     const m = messages[idx];
     setMessages(prev => prev.map((msg, i) => i === idx ? { ...msg, feedback: isGood ? "good" : "bad" } : msg));
-    if (!isGood) {
-      await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: m.question, answer: m.text, time: new Date().toLocaleString("ko-KR") }),
-      });
-    }
+    await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: m.question, answer: m.text, time: new Date().toLocaleString("ko-KR"), isGood }),
+    });
   }
 
   return (

@@ -35,9 +35,9 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const { question, answer, time } = await request.json();
+  const { question, answer, time, isGood } = await request.json();
   const { content, sha } = await getFileSHA();
-  const newItem = { id: Date.now(), question, answer, time, corrected: null };
+  const newItem = { id: Date.now(), question, answer, time, isGood: !!isGood, corrected: null };
   content.push(newItem);
   await saveToGitHub(content, sha);
   return Response.json(newItem);
