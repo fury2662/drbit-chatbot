@@ -75,7 +75,7 @@ export default function Home() {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f0f4f8", fontFamily: "'Noto Sans KR', sans-serif" }}>
-      <div style={{ width: 440, background: "#fff", borderRadius: 20, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", overflow: "hidden", maxHeight: "95vh" }}>
+      <div style={{ width: 440, height: 680, background: "#fff", borderRadius: 20, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
         {/* 헤더 */}
         <div style={{ background: "linear-gradient(135deg,#1a56db,#1e429f)", color: "#fff", padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
