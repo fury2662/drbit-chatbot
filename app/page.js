@@ -1,14 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
-const QUICK_BTNS = [
-  { label: "🔴 DB 용량 오류", msg: "저희 쪽에서 DB 용량 오류가 발생했어요" },
-  { label: "📋 변환/송신오류", msg: "저희 변환이나 송신이 안됩니다" },
-  { label: "📅 연말정산", msg: "연말정산 소득공제 관련해서 알려주세요" },
-  { label: "🔢 진료확인번호", msg: "진료확인번호 관련 오류가 있어요" },
-  { label: "📞 고객센터", msg: "고객센터 전화번호 알려주세요" },
-];
-
 function getTime() {
   const d = new Date();
   return d.getHours().toString().padStart(2, "0") + ":" + d.getMinutes().toString().padStart(2, "0");
@@ -22,11 +14,25 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [showQuick, setShowQuick] = useState(true);
   const [history, setHistory] = useState([]);
+  const [quickBtns, setQuickBtns] = useState([]);
+  const [notices, setNotices] = useState([]);
+  const [showNotice, setShowNotice] = useState(true);
   const bottomRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    // 자주 묻는 질문 Top5 불러오기
+    fetch("/api/stats").then(r => r.json()).then(data => {
+      if (data.length > 0) setQuickBtns(data);
+    });
+    // 공지사항 불러오기
+    fetch("/api/notice").then(r => r.json()).then(data => {
+      setNotices(data.filter(n => n.active));
+    });
+  }, []);
 
   async function sendMessage(text) {
     const msg = (text || input).trim();
@@ -37,6 +43,9 @@ export default function Home() {
     const newHistory = [...history, { role: "user", content: msg }];
     setHistory(newHistory);
     setIsLoading(true);
+
+    // 질문 기록 저장
+    fetch("/api/stats", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: msg }) });
 
     try {
       const res = await fetch("/api/chat", {
@@ -66,7 +75,7 @@ export default function Home() {
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", background: "#f0f4f8", fontFamily: "'Noto Sans KR', sans-serif" }}>
-      <div style={{ width: 440, height: 680, background: "#fff", borderRadius: 20, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ width: 440, background: "#fff", borderRadius: 20, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", display: "flex", flexDirection: "column", overflow: "hidden", maxHeight: "95vh" }}>
 
         {/* 헤더 */}
         <div style={{ background: "linear-gradient(135deg,#1a56db,#1e429f)", color: "#fff", padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
@@ -81,6 +90,23 @@ export default function Home() {
           <div style={{ background: "rgba(255,255,255,0.15)", padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600 }}>DRBIT</div>
         </div>
 
+        {/* 공지사항 */}
+        {notices.length > 0 && showNotice && (
+          <div style={{ background: "#fff8e1", borderLeft: "4px solid #f59e0b", padding: "10px 14px" }}>
+            {notices.map(n => (
+              <div key={n.id} style={{ marginBottom: notices.length > 1 ? 8 : 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: n.important ? "#c62828" : "#92400e" }}>
+                    {n.important ? "🚨" : "📢"} {n.title}
+                  </span>
+                  <button onClick={() => setShowNotice(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "#aaa" }}>✕</button>
+                </div>
+                {n.body && <div style={{ fontSize: 12, color: "#78350f", marginTop: 3, whiteSpace: "pre-wrap" }}>{n.body}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* 메시지 */}
         <div style={{ flex: 1, overflowY: "auto", padding: "16px 16px 8px", display: "flex", flexDirection: "column", gap: 12 }}>
           {messages.map((m, i) => (
@@ -93,7 +119,6 @@ export default function Home() {
                   {m.text}
                 </div>
                 <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 4, textAlign: m.role === "user" ? "right" : "left" }}>{m.time}</div>
-                {/* 👍👎 피드백 버튼 */}
                 {m.role === "bot" && m.question && (
                   <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
                     {m.feedback === null ? <>
@@ -121,14 +146,14 @@ export default function Home() {
           <div ref={bottomRef} />
         </div>
 
-        {/* 빠른 질문 */}
-        {showQuick && (
+        {/* 자주 묻는 질문 */}
+        {showQuick && quickBtns.length > 0 && (
           <div style={{ padding: "0 16px 10px" }}>
-            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 6, fontWeight: 500 }}>자주 하는 질문</div>
+            <div style={{ fontSize: 11, color: "#6b7280", marginBottom: 6, fontWeight: 500 }}>🔥 자주 묻는 질문</div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {QUICK_BTNS.map((b, i) => (
-                <button key={i} onClick={() => sendMessage(b.msg)} style={{ background: "#eff6ff", color: "#1a56db", border: "1px solid #bfdbfe", padding: "5px 11px", borderRadius: 20, fontSize: 12, cursor: "pointer" }}>
-                  {b.label}
+              {quickBtns.map((q, i) => (
+                <button key={i} onClick={() => sendMessage(q)} style={{ background: "#eff6ff", color: "#1a56db", border: "1px solid #bfdbfe", padding: "5px 11px", borderRadius: 20, fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}>
+                  {q.length > 15 ? q.slice(0, 15) + "..." : q}
                 </button>
               ))}
             </div>

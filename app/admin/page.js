@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 
-const TABS = ["📋 FAQ 관리", "📊 엑셀/CSV", "📄 문서 업로드", "🌐 URL 학습", "💬 피드백 관리"];
+const TABS = ["📋 FAQ 관리", "📊 엑셀/CSV", "📄 문서 업로드", "🌐 URL 학습", "💬 피드백 관리", "📢 공지사항"];
 
 export default function AdminPage() {
   const [tab, setTab] = useState(0);
@@ -9,6 +9,14 @@ export default function AdminPage() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [fbFilter, setFbFilter] = useState("all"); // all, good, bad, pending
   const [correcting, setCorrecting] = useState({});
+  const [notices, setNotices] = useState([]);
+  const [newNoticeTitle, setNewNoticeTitle] = useState("");
+  const [newNoticeBody, setNewNoticeBody] = useState("");
+  const [newNoticeImportant, setNewNoticeImportant] = useState(false);
+  const [editNoticeId, setEditNoticeId] = useState(null);
+  const [editNoticeTitle, setEditNoticeTitle] = useState("");
+  const [editNoticeBody, setEditNoticeBody] = useState("");
+  const [editNoticeImportant, setEditNoticeImportant] = useState(false);
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState(null);
   const [editQ, setEditQ] = useState("");
@@ -22,11 +30,49 @@ export default function AdminPage() {
   const fileRef = useRef();
   const docRef = useRef();
 
-  useEffect(() => { fetchFAQ(); fetchFeedbacks(); }, []);
+  useEffect(() => { fetchFAQ(); fetchFeedbacks(); fetchNotices(); }, []);
 
   async function fetchFAQ() {
     const res = await fetch("/api/faq");
     setFaqs(await res.json());
+  }
+
+  async function fetchNotices() {
+    const res = await fetch("/api/notice");
+    setNotices(await res.json());
+  }
+
+  async function addNotice() {
+    if (!newNoticeTitle.trim()) return;
+    setLoading(true);
+    await fetch("/api/notice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: newNoticeTitle, body: newNoticeBody, important: newNoticeImportant }) });
+    setNewNoticeTitle(""); setNewNoticeBody(""); setNewNoticeImportant(false);
+    await fetchNotices();
+    setLoading(false);
+    notify("✅ 공지사항이 등록됐어요!");
+  }
+
+  async function updateNotice() {
+    setLoading(true);
+    await fetch("/api/notice", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editNoticeId, title: editNoticeTitle, body: editNoticeBody, important: editNoticeImportant, active: true }) });
+    setEditNoticeId(null);
+    await fetchNotices();
+    setLoading(false);
+    notify("✅ 수정됐어요!");
+  }
+
+  async function toggleNotice(n) {
+    await fetch("/api/notice", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...n, active: !n.active }) });
+    await fetchNotices();
+  }
+
+  async function deleteNotice(id) {
+    if (!confirm("삭제할까요?")) return;
+    setLoading(true);
+    await fetch("/api/notice", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    await fetchNotices();
+    setLoading(false);
+    notify("🗑️ 삭제됐어요!");
   }
 
   async function fetchFeedbacks() {
@@ -318,6 +364,50 @@ export default function AdminPage() {
                 </>
               )}
               <button onClick={() => deleteFeedback(fb.id)} style={{ ...btn("#c62828"), marginLeft: 8 }}>삭제</button>
+            </div>
+          ))}
+        </div>}
+
+        {/* 탭6: 공지사항 */}
+        {tab === 5 && <div>
+          <div style={{ background: "#fff", borderRadius: 8, padding: 20, marginBottom: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+            <h3 style={{ margin: "0 0 12px", color: "#1a56a0", fontSize: 15 }}>➕ 새 공지사항 등록</h3>
+            <input value={newNoticeTitle} onChange={e => setNewNoticeTitle(e.target.value)} placeholder="제목" style={inp} />
+            <textarea value={newNoticeBody} onChange={e => setNewNoticeBody(e.target.value)} placeholder="내용 (선택)" rows={3} style={{ ...inp, resize: "vertical" }} />
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#444", marginBottom: 12, cursor: "pointer" }}>
+              <input type="checkbox" checked={newNoticeImportant} onChange={e => setNewNoticeImportant(e.target.checked)} />
+              🚨 긴급 공지 (빨간색으로 표시)
+            </label>
+            <button onClick={addNotice} disabled={loading || !newNoticeTitle.trim()} style={btn("#1a56a0")}>등록</button>
+          </div>
+
+          {notices.length === 0 && <div style={{ background: "#fff", borderRadius: 8, padding: 24, textAlign: "center", color: "#aaa" }}>등록된 공지사항이 없어요!</div>}
+          {[...notices].reverse().map(n => (
+            <div key={n.id} style={{ background: "#fff", borderRadius: 8, padding: 16, marginBottom: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${n.important ? "#c62828" : "#1a56a0"}`, opacity: n.active ? 1 : 0.5 }}>
+              {editNoticeId === n.id ? <>
+                <input value={editNoticeTitle} onChange={e => setEditNoticeTitle(e.target.value)} style={inp} />
+                <textarea value={editNoticeBody} onChange={e => setEditNoticeBody(e.target.value)} rows={3} style={{ ...inp, resize: "vertical" }} />
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, marginBottom: 12, cursor: "pointer" }}>
+                  <input type="checkbox" checked={editNoticeImportant} onChange={e => setEditNoticeImportant(e.target.checked)} />
+                  🚨 긴급 공지
+                </label>
+                <button onClick={updateNotice} disabled={loading} style={btn("#2e7d32")}>저장</button>
+                <button onClick={() => setEditNoticeId(null)} style={{ ...btn("#888"), marginLeft: 8 }}>취소</button>
+              </> : <>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <span style={{ fontWeight: "bold", color: n.important ? "#c62828" : "#1a56a0", fontSize: 15 }}>
+                    {n.important ? "🚨" : "📢"} {n.title}
+                  </span>
+                  <span style={{ fontSize: 11, background: n.active ? "#e8f5e9" : "#f5f5f5", color: n.active ? "#2e7d32" : "#888", padding: "2px 8px", borderRadius: 10 }}>
+                    {n.active ? "표시중" : "숨김"}
+                  </span>
+                </div>
+                {n.body && <div style={{ fontSize: 13, color: "#555", whiteSpace: "pre-wrap", marginBottom: 8 }}>{n.body}</div>}
+                <div style={{ fontSize: 11, color: "#aaa", marginBottom: 10 }}>📅 {n.createdAt}</div>
+                <button onClick={() => { setEditNoticeId(n.id); setEditNoticeTitle(n.title); setEditNoticeBody(n.body || ""); setEditNoticeImportant(n.important); }} style={btn("#f57c00")}>수정</button>
+                <button onClick={() => toggleNotice(n)} style={{ ...btn(n.active ? "#888" : "#2e7d32"), marginLeft: 8 }}>{n.active ? "숨기기" : "표시"}</button>
+                <button onClick={() => deleteNotice(n.id)} style={{ ...btn("#c62828"), marginLeft: 8 }}>삭제</button>
+              </>}
             </div>
           ))}
         </div>}
